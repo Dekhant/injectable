@@ -1,4 +1,22 @@
 # ChangeLog
+## [2.7.1+4]
+- Docs: fix a typo in readme
+## [2.7.1+3]
+- Docs: update docs to include lean_builder support
+## [2.7.1+2]
+- Fix: fix coverage badge alignment in readme
+## [2.7.1+1]
+- Chore: add test coverage badge to readme
+## [2.7.1]
+- Feat: Add `generateAccessors` option to `@InjectableInit` annotation for generating GetIt extension getters
+- Feat: Improve dependency sorting logic
+- Feat: Add test coverage reporting
+- Feat: Add comprehensive test suite for better code quality
+## [2.7.0]
+- Feat: Add support to cached factories introduced in get_it 8.0.0
+- Chore: update get_it constraint to 8.3.0 <= 10.0.0
+## [2.6.0]
+- Chore: update get_it constraint to 7.2.0 < 10.0.0
 ## [2.5.2]
 - Update dart constrains to ">=3.8.0 <4.0.0"
 ## [2.5.1]

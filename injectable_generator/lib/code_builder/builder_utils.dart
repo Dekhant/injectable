@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:code_builder/code_builder.dart';
 import 'package:collection/collection.dart';
+import 'package:injectable/injectable.dart';
 import 'package:injectable_generator/models/dependency_config.dart';
 import 'package:injectable_generator/models/importable_type.dart';
 import 'package:injectable_generator/models/injected_dependency.dart';
@@ -11,9 +12,8 @@ import 'package:meta/meta.dart';
 class DependencyList with IterableMixin<DependencyConfig> {
   final List<DependencyConfig> _dependencies;
 
-  DependencyList({
-    required List<DependencyConfig> dependencies,
-  }) : _dependencies = sortDependencies(dependencies);
+  DependencyList({required List<DependencyConfig> dependencies})
+    : _dependencies = sortDependencies(dependencies);
 
   bool hasAsyncDependency(DependencyConfig dep) {
     _ensureAsyncDepsMapInitialized();
@@ -60,10 +60,7 @@ class _DependencyId {
   final ImportableType type;
   final String? instanceName;
 
-  const _DependencyId({
-    required this.type,
-    required this.instanceName,
-  });
+  const _DependencyId({required this.type, required this.instanceName});
 
   @override
   String toString() {
@@ -111,6 +108,13 @@ void _sortByDependents(
         return true;
       }
 
+      /// special case for environments set
+      if (iDep.type.name == 'Set' &&
+          iDep.type.typeArguments.firstOrNull?.name == 'String' &&
+          iDep.instanceName == kEnvironmentsName) {
+        return true;
+      }
+
       /// for empty environments we check to see if all the dependencies from
       /// all the environments are already in sorted
       if (dep.environments.isEmpty) {
@@ -123,25 +127,19 @@ void _sortByDependents(
         if (deps.every(sorted.contains)) {
           return true;
         }
-      }
-      if (dep.environments.isEmpty) {
-        final List<DependencyConfig> deps = unSorted
-            .where(
-              (d) => d.type == iDep.type && d.instanceName == iDep.instanceName,
-            )
-            .toList(growable: false);
-
-        if (deps.every(sorted.contains)) {
+      } else {
+        int foundForEnvs = 0;
+        for (final env in dep.environments) {
+          if (lookupDependencyWithNoEnvOrHasAny(iDep, sorted, [env]) == null) {
+            return false;
+          } else {
+            foundForEnvs++;
+          }
+        }
+        // if all deps for all environments are found we can proceed
+        if (foundForEnvs == dep.environments.length) {
           return true;
         }
-      } else if (lookupDependencyWithNoEnvOrHasAny(
-            iDep,
-            sorted,
-            dep.environments,
-          ) !=
-          null) {
-        // if dep is already in sorted return true
-        return true;
       }
 
       // if dep is in unSorted we skip it in this iteration, if not we include it
@@ -159,7 +157,6 @@ void _sortByDependents(
     var difference = unSorted
         .where((element) => !sorted.contains(element))
         .toList();
-
     _sortByDependents(difference, sorted);
   }
 }
@@ -184,9 +181,7 @@ DependencyConfig? lookupDependencyWithNoEnvOrHasAny(
         d.instanceName == iDep.instanceName &&
         (d.environments.isEmpty ||
             envs.isEmpty ||
-            d.environments.any(
-              (e) => envs.contains(e),
-            )),
+            d.environments.any(envs.contains)),
   );
 }
 

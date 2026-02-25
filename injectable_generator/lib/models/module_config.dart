@@ -63,7 +63,7 @@ class ModuleConfig {
     return <String, dynamic>{
       'isAbstract': isAbstract,
       'isMethod': isMethod,
-      'type': type,
+      'type': type.toJson(),
       'initializerName': initializerName,
     };
   }
