@@ -41,6 +41,7 @@ void reportMissingDependencies(
   Iterable<String> ignoredTypesInPackages,
   Uri? targetFile,
   bool throwOnMissingDependencies,
+  Iterable<String?> generateForEnvironments,
 ) {
   final messages = [];
   for (final dep in deps) {
@@ -67,13 +68,21 @@ void reportMissingDependencies(
             .reduce((a, b) => a + b)
             .toSet();
         if (availableEnvs.isNotEmpty) {
-          final missingEnvs = dep.environments.toSet().difference(
-            availableEnvs,
-          );
-          if (missingEnvs.isNotEmpty) {
+          final targetEnvs = dep.environments.isEmpty
+              ? generateForEnvironments.whereType<String>().toSet()
+              : dep.environments.toSet();
+
+          if (targetEnvs.isEmpty) {
             messages.add(
-              '[${dep.typeImpl}] ${dep.environments.toSet()} depends on Type [${iDep.type}]  ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
+              '[${dep.typeImpl}] has no environment restrictions but depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is only available under environment keys $availableEnvs',
             );
+          } else {
+            final missingEnvs = targetEnvs.difference(availableEnvs);
+            if (missingEnvs.isNotEmpty) {
+              messages.add(
+                '[${dep.typeImpl}] ${dep.environments.isEmpty ? 'has no environment restrictions but' : dep.environments.toSet()} depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
+              );
+            }
           }
         }
       }

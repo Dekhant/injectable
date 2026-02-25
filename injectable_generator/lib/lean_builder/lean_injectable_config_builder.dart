@@ -184,6 +184,7 @@ class InjectableConfigGenerator
       ignoreTypesInPackages,
       targetFile,
       throwOnMissingDependencies,
+      generateForEnvironments,
     );
     validateDuplicateDependencies(deps);
 

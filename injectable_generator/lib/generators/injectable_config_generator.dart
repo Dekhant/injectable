@@ -162,6 +162,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
       ignoreTypesInPackages,
       targetFile,
       throwOnMissingDependencies,
+      generateForEnvironments,
     );
     validateDuplicateDependencies(deps);
 
